@@ -302,7 +302,20 @@ impl tokio_util::codec::Decoder for Codec {
 
                         // TODO: Check crc32 of payload data
 
-                        let metadata = Metadata::decode(payload_frame.metadata)?;
+                        // ref: https://github.com/streamnative/pulsar-rs/issues/303
+                        let metadata = Metadata::decode(payload_frame.metadata).or_else(|e| {
+                            warn!("Decode Metadata failed: {e}");
+                            match std::fs::File::create(uuid::Uuid::new_v4().to_string()) {
+                                Ok(mut file) => {
+                                    use std::io::Write;
+                                    let _ = file.write_all(payload_frame.metadata);
+                                }
+                                _ => {
+                                    warn!("{:?}", payload_frame.metadata);
+                                }
+                            };
+                            Ok::<MessageMetadata, ConnectionError>(Metadata::default())
+                        })?;
                         Some(Payload {
                             metadata,
                             data: buf.to_vec(),

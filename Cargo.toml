@@ -75,3 +75,6 @@ async-std-rustls-runtime = ["async-std", "asynchronous-codec", "async-rustls", "
 auth-oauth2 = [ "openidconnect", "oauth2", "serde", "serde_json", "data-url" ]
 telemetry = ["tracing"]
 protobuf-src = ["dep:protobuf-src"]
+
+[workspace]
+
