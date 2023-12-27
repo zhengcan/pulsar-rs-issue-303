@@ -305,7 +305,10 @@ impl tokio_util::codec::Decoder for Codec {
                         // ref: https://github.com/streamnative/pulsar-rs/issues/303
                         let metadata = Metadata::decode(payload_frame.metadata).or_else(|e| {
                             warn!("Decode Metadata failed: {e}");
-                            match std::fs::File::create(uuid::Uuid::new_v4().to_string()) {
+                            match std::fs::File::create(format!(
+                                "pulsar-metadata/{}",
+                                uuid::Uuid::new_v4()
+                            )) {
                                 Ok(mut file) => {
                                     use std::io::Write;
                                     let _ = file.write_all(payload_frame.metadata);
